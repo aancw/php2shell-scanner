@@ -36,6 +36,8 @@ jobs:
     name: build ${{ matrix.goos }}-${{ matrix.goarch }}
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     strategy:
       fail-fast: false
       matrix:
@@ -61,34 +63,6 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Build
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          GOARM: ${{ matrix.goarm }}
-          CGO_ENABLED: "0"
-        run: |
-          mkdir -p dist
-          ext=""
-          if [ "$GOOS" = "windows" ]; then ext=".exe"; fi
-          name="${BINARY_NAME}-${GOOS}-${GOARCH}${ext}"
-          go build -trimpath -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" -o "dist/$name" .
-          file "dist/$name"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: bin-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/
-          if-no-files-found: error
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
       - name: Resolve the tag
         id: tag
         env:
@@ -105,6 +79,35 @@ jobs:
             tag="$INPUT_TAG"
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          GOARM: ${{ matrix.goarm }}
+          CGO_ENABLED: "0"
+          VERSION: ${{ steps.tag.outputs.tag }}
+        run: |
+          mkdir -p dist
+          ext=""
+          if [ "$GOOS" = "windows" ]; then ext=".exe"; fi
+          name="${BINARY_NAME}-${GOOS}-${GOARCH}${ext}"
+          go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o "dist/$name" .
+          file "dist/$name"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
       - name: Package
         run: |
@@ -125,7 +128,7 @@ jobs:
       - name: Attach to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.tag.outputs.tag }}
+          TAG: ${{ needs.build.outputs.tag }}
           REPO: ${{ github.repository }}
         run: |
           gh release view "$TAG" -R "$REPO" >/dev/null 2>&1 \
