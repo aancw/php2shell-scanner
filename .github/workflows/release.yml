@@ -111,6 +111,8 @@ jobs:
           mkdir -p release
           for f in artifacts/*/*; do
             name=$(basename "$f")
+            # the artifact store keeps the mode, make sure the binary stays executable
+            chmod 0755 "$f"
             case "$name" in
               *.exe) cp "$f" "release/$name" ;;
               *)     tar -czf "release/${name}.tar.gz" -C "$(dirname "$f")" "$name" ;;
