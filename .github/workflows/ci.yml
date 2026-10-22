@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - run: go vet ./...
+      - run: go test ./...
+
+      - name: Build
+        run: go build -trimpath -ldflags "-s -w" -o /tmp/php2shell-scanner .
+
+      - name: Show the version
+        run: /tmp/php2shell-scanner --help | head -2

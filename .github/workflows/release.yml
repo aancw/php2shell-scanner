@@ -3,6 +3,8 @@ name: release
 on:
   release:
     types: [published]
+  push:
+    tags: ['v*']
   workflow_dispatch:
     inputs:
       tag:
@@ -65,13 +67,12 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
           GOARM: ${{ matrix.goarm }}
           CGO_ENABLED: "0"
-          VERSION: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
           mkdir -p dist
           ext=""
           if [ "$GOOS" = "windows" ]; then ext=".exe"; fi
           name="${BINARY_NAME}-${GOOS}-${GOARCH}${ext}"
-          go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o "dist/$name" .
+          go build -trimpath -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" -o "dist/$name" .
           file "dist/$name"
 
       - uses: actions/upload-artifact@v4
@@ -87,6 +88,23 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: Resolve the tag
+        id: tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$EVENT" = "release" ]; then
+            tag="$RELEASE_TAG"
+          elif [ "$EVENT" = "push" ]; then
+            tag="$REF_NAME"
+          else
+            tag="$INPUT_TAG"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Package
         run: |
@@ -105,7 +123,9 @@ jobs:
       - name: Attach to the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          REPO: ${{ github.repository }}
         run: |
-          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "$TAG" --generate-notes
-          gh release upload "$TAG" release/* --clobber
+          gh release view "$TAG" -R "$REPO" >/dev/null 2>&1 \
+            || gh release create "$TAG" -R "$REPO" --title "$TAG" --generate-notes
+          gh release upload "$TAG" -R "$REPO" release/* --clobber
