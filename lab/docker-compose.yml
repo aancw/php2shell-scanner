@@ -1,0 +1,15 @@
+services:
+  ssh-target:
+    build: .
+    image: php2shell-scanner-ssh-target
+    container_name: p2s-ssh-target
+    ports:
+      - "127.0.0.1:2222:22"
+      # the same container also serves PHP over http, for the url mode
+      - "127.0.0.1:8081:80"
+    volumes:
+      # public key of the scanner's identity, mounted read only
+      - ./authorized_keys:/run/authorized_keys:ro
+    environment:
+      # lab password for root, only for testing password authentication
+      P2S_ROOT_PASSWORD: ${P2S_ROOT_PASSWORD:-labpass123}
