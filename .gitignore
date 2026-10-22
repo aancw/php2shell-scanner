@@ -1,0 +1,7 @@
+# build output
+/php2shell-scanner
+/php2shell-scanner-*
+/dist/
+
+# os
+.DS_Store
