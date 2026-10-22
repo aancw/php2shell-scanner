@@ -256,3 +256,6 @@ Go 1.27+. One dependency: `golang.org/x/crypto/ssh` (SSH transport only).
 release is published, and it can also be started by hand with
 `workflow_dispatch` and a tag, in which case it creates the release when it
 does not exist yet.
+
+## Credits
+- [mikensec/php2shell-lab](https://github.com/mikensec/php2shell-lab)
