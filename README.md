@@ -100,6 +100,7 @@ Useful flags:
 | `--crawl` | url | look for exposed phpinfo pages (on by default) |
 | `--insecure` | url | skip TLS verification |
 | `--path` | url | extra endpoint to probe, repeatable |
+| `--user-agent <string>` | url | `User-Agent` header; none is sent by default |
 | `--agent`, `--password`, `--passphrase`, `--known-hosts`, `--insecure-host-key` | ssh | authentication and host key handling |
 
 Exit codes: `0` clean, `1` findings at or above `--fail-on`, `2` usage or runtime error.
@@ -135,7 +136,9 @@ source backports.
   `PHP_SESSION_UPLOAD_PROGRESS` field and no cookie. That is the request shape
   the Suricata rules in [php2shell-lab](https://github.com/mikensec/php2shell-lab)
   key on, so the probe doubles as a correlation point. The probe never contains
-  a PHP open tag unless `--canary` is given.
+  a PHP open tag unless `--canary` is given. Every request from `url` mode
+  carries no `User-Agent` unless `--user-agent` is set, so match on the request
+  shape rather than on the header.
 
 The OOM corruption path is **not** probed: proving it means exhausting the
 target's memory, which is a denial of service. The scanner reports the

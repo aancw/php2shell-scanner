@@ -26,10 +26,10 @@ type Options struct {
 	URL       string
 	Timeout   time.Duration
 	Insecure  bool
-	UserAgent string
-	Probe     bool // send the session.upload_progress arming probe
-	Canary    bool // arming probe carries an inert PHP comment (Suricata/YARA validation)
-	Crawl     bool // look for exposed phpinfo pages
+	UserAgent string // User-Agent header; empty sends none at all
+	Probe     bool   // send the session.upload_progress arming probe
+	Canary    bool   // arming probe carries an inert PHP comment (Suricata/YARA validation)
+	Crawl     bool   // look for exposed phpinfo pages
 	Paths     []string
 }
 
@@ -57,9 +57,6 @@ func Scan(ctx context.Context, opts Options) ([]report.Finding, map[string]strin
 	}
 	if opts.Timeout <= 0 {
 		opts.Timeout = 20 * time.Second
-	}
-	if opts.UserAgent == "" {
-		opts.UserAgent = "php2shell-scanner/1.0"
 	}
 	client := &http.Client{
 		Timeout: opts.Timeout,
@@ -566,6 +563,8 @@ func get(ctx context.Context, client *http.Client, target, ua string) (*http.Res
 	if err != nil {
 		return nil, "", err
 	}
+	// An empty value is what suppresses the header: net/http sends its own
+	// default user agent only when the key is absent.
 	req.Header.Set("User-Agent", ua)
 	req.Header.Set("Accept", "*/*")
 	resp, err := client.Do(req)

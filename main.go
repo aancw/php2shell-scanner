@@ -77,7 +77,7 @@ func runURL(args []string) int {
 	probe := fs.Bool("probe", true, "send the session.upload_progress arming probe")
 	canary := fs.Bool("canary", false, "arming probe carries an inert PHP comment (lets Suricata/YARA rules fire)")
 	crawl := fs.Bool("crawl", true, "look for exposed phpinfo pages")
-	ua := fs.String("user-agent", "php2shell-scanner/1.0", "user agent header")
+	ua := fs.String("user-agent", "", "user agent header, empty sends none")
 	workers := fs.Int("concurrency", 5, "targets to scan in parallel")
 	paths := stringList{}
 	fs.Var(&paths, "path", "extra path to probe, repeatable")
