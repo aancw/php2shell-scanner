@@ -13,6 +13,11 @@ The scanner is a detector, not an exploit. The only request it sends is a benign
 `session.upload_progress` arming probe that contains no PHP code unless you ask
 for the inert canary with `--canary`.
 
+**Authorized use only.** Run this against systems you own or have prior written
+permission to test. It is provided with no warranty and no liability for
+damages. Read [Disclaimer and responsibility](#disclaimer-and-responsibility)
+before you use it.
+
 ## Install
 
 Download the binary for your platform from the
@@ -241,6 +246,42 @@ inert `<?php /* ... */ ?>` comment, which is what makes the Suricata rule
   path. Neither is a substitute for the patch.
 * The version table is the one from the PHP advisories of 2026-10-21. Confirm
   the range against php.net before acting on an end-of-life branch.
+
+## Disclaimer and responsibility
+
+This tool is for authorized security testing only. Running it against a system
+without the owner's prior written permission can be an offence under computer
+misuse and unauthorized access laws, and knowing which of them apply is your
+responsibility. Own the target or hold a signed scope, statement of work or
+equivalent authorization that covers exactly these checks, and stay inside it.
+
+* **A detector, not an exploit.** There is no exploit payload, no code execution
+  primitive and no post-exploitation action. The tool fingerprints versions and
+  configuration and, unless the probe is disabled, sends one benign
+  `session.upload_progress` request. The OOM corruption path is deliberately
+  never probed.
+* **It still changes target state.** The `url` probe runs against every target,
+  not only vulnerable ones: on any host with `session.upload_progress.enabled`
+  and `session.upload_progress.cleanup` off it can leave a `sess_*` entry
+  behind, patched or not, and its POST shows up in access logs and can trip IDS
+  rules. `local` and `ssh` mode read files, ini values and session directories
+  with the privileges you hand them, so paths, configuration and any credentials
+  stored in those files end up in the report.
+* **Heuristics, not proof.** Findings can be false positive or false negative.
+  Confirm a critical result by hand before you patch, act on or disclose it.
+* **No warranty.** The tool is provided "as is", without warranty of any kind,
+  express or implied, including merchantability, fitness for a particular
+  purpose and non-infringement.
+* **No liability.** The authors and contributors are not liable for any claim,
+  damage or other liability — service disruption, denial of service, data loss,
+  legal action, regulatory penalty — arising from the use or misuse of this
+  tool, even if advised of the possibility.
+* **Handle reports as sensitive.** They carry hostnames, versions, file paths
+  and configuration detail from the scanned environment; treat them with the
+  same care as the target's own vulnerability data.
+* **Independent tool.** Not endorsed by, affiliated with or maintained by the
+  PHP Group, or by any vendor, distribution or hosting provider named above.
+  All product and project names belong to their respective owners.
 
 ## Development
 
