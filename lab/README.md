@@ -4,8 +4,8 @@ Throwaway container that runs the vulnerable PHP release 8.3.35 with an SSH
 server, so the `ssh` mode of php2shell-scanner can be tested end to end.
 
 ```bash
-# 1. a key pair for the scanner to authenticate with
-ssh-keygen -t ed25519 -f ./id_ed25519 -N ''
+# 1. a key pair for the scanner to authenticate with (-C '' leaves the comment empty)
+ssh-keygen -t ed25519 -f ./id_ed25519 -N '' -C ''
 
 # 2. hand the public key to the container
 cp ./id_ed25519.pub ./authorized_keys

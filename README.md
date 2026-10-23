@@ -224,7 +224,7 @@ mode can be tested without touching a real host:
 
 ```bash
 cd lab
-ssh-keygen -t ed25519 -f ./id_ed25519 -N ''
+ssh-keygen -t ed25519 -f ./id_ed25519 -N '' -C ''   # -C '' keeps user@host out of the key comment
 cp ./id_ed25519.pub ./authorized_keys
 docker compose up -d --build
 ssh-keyscan -p 2222 127.0.0.1 >> ./known_hosts
