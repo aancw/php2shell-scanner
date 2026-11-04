@@ -17,6 +17,8 @@ func TestAssess(t *testing.T) {
 		{"8.5.12", StatePatched},
 		{"8.1.29", StateEOL},
 		{"7.4.33", StateEOL},
+		{"7.0.0", StateEOL},
+		{"7.0", StateEOL},
 		{"8.6.0", StateUnknown},
 	}
 	for _, c := range cases {

@@ -43,8 +43,8 @@ var defaultPaths = []string{
 }
 
 var (
-	poweredByRe = regexp.MustCompile(`PHP/(\d+\.\d+\.\d+)`)
-	versionRe   = regexp.MustCompile(`PHP Version (\d+\.\d+\.\d+)`)
+	poweredByRe = regexp.MustCompile(`PHP/(\d+\.\d+(\.\d+)?)`)
+	versionRe   = regexp.MustCompile(`PHP Version (\d+\.\d+(\.\d+)?)`)
 	phpinfoRow  = regexp.MustCompile(`(?s)<td[^>]*class="e"[^>]*>(.*?)</td>\s*<td[^>]*class="v"[^>]*>(.*?)</td>`)
 	tagRe       = regexp.MustCompile(`(?s)<[^>]+>`)
 )
