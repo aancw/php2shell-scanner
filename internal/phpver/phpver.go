@@ -29,7 +29,7 @@ func (v Version) Less(o Version) bool {
 	}
 }
 
-var verRe = regexp.MustCompile(`(\d+)\.(\d+)\.(\d+)`)
+var verRe = regexp.MustCompile(`(\d+)\.(\d+)(\.(\d+))?`)
 
 // Parse extracts a version from a string such as "PHP 8.3.35 (cli)".
 func Parse(s string) (Version, bool) {
@@ -39,7 +39,10 @@ func Parse(s string) (Version, bool) {
 	}
 	ma, _ := strconv.Atoi(m[1])
 	mi, _ := strconv.Atoi(m[2])
-	pa, _ := strconv.Atoi(m[3])
+	pa := 0
+	if m[3] != "" {
+		pa , _ = strconv.Atoi(m[3])
+	}
 	return Version{Major: ma, Minor: mi, Patch: pa}, true
 }
 
